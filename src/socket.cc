@@ -156,10 +156,12 @@ namespace blyat {
       spdlog::error("Session {} got an error on read:{}", _session?_session->id().str():"UNKNONW_SESSION", ec.message());
       // clear if buffer remains some message
       _buffer.consume(_buffer.size());
-      return do_read();
+      if(_ws.is_open()) return do_read();
+      else return;
     }
 
-    //_ws.text(_ws.got_text());
+    _ws.text(_ws.got_text());
+    _ws.binary(!_ws.got_text());
     blyat::message_t message;
     if(_session) {
       try {
@@ -168,6 +170,7 @@ namespace blyat {
 	//_session->received();
 	message.message_buffer = std::make_shared<std::string>(boost::beast::buffers_to_string(_buffer.data()));
 	_buffer.consume(_buffer.size());
+	message.binary = _ws.got_text();
 	if(_ws.got_text()) spdlog::info("Got message from Session[{}] : {}", std::string(message.source_session), *message.message_buffer);
 	else spdlog::info("Got message from Session[{}] : {} bytes", std::string(message.source_session), message.message_buffer->size());
 	_session->room().broadcast(std::move(message));
@@ -209,6 +212,7 @@ namespace blyat {
       _queue.erase(_queue.begin());
 
       if(!_queue.empty()) { // keep writing waited queue
+	_ws.binary(_queue.front()->binary);
 	_ws.async_write(
 			boost::asio::buffer(*_queue.front()->message_buffer),
 			boost::beast::bind_front_handler(&socket::on_write,shared_from_this()));
