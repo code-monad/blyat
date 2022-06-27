@@ -22,10 +22,12 @@ namespace blyat {
     blyat_id_t has_room_id(std::uint64_t id);
     void run(config_fields_t configs);
     void move_session_to_room(blyat_id_t session, blyat_id_t room);
+    blyat_id_t default_room() { return _default_room; };
 
   private:
     void do_accept();
     void on_accept(boost::beast::error_code ec, boost::asio::ip::tcp::socket socket);
+    blyat_id_t _default_room;
     boost::asio::io_context& _context;
     boost::asio::ip::tcp::acceptor _acceptor;
     std::string _doc_root;

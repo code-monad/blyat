@@ -17,7 +17,7 @@ RUN sed -i 's|security.debian.org/debian-security|mirrors.ustc.edu.cn/debian-sec
 RUN TZ=Asia/Shanghai DEBIAN_FRONTEND=noninteractive apt-get update && apt-get install -y tzdata && apt-get clean
 WORKDIR /app/
 COPY --from=build /src/build/blyat .
-COPY --from=build /src/config/blyat.toml ./config/blyat.toml
+COPY --from=build /src/docker/blyat.toml ./config/blyat.toml
 COPY --from=build /src/docker/scripts.sh ./run.sh
 EXPOSE ${PORT}
 ENTRYPOINT ["/app/run.sh"]

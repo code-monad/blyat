@@ -85,14 +85,15 @@ namespace blyat {
 	  }
 	  
 	  if(target_seq.empty() ) { // join default room
-	    self->session()->join_room_by_name("_");
+	    self->session()->join_default_room();
 	    spdlog::info("Session join default room.");
 	  } else if(target_seq.size() == 1) { // join by name
-	    //self->session()->join_room_by_name(targets.front());
+	    self->session()->join_room_by_name(target_seq.front());
 	  } else if(target_seq.size() > 1) {
 	    if(target_seq.front() == "room") { // by name
 	      std::string room_name(target_seq[1]);
 	      spdlog::info("Session {} try join room {}",session_id, room_name);
+
 	      try{
 		self->session()->join_room_by_name(room_name);
 	      } catch(std::exception& e) {
