@@ -162,14 +162,18 @@ namespace blyat {
     //_ws.text(_ws.got_text());
     blyat::message_t message;
     if(_session) {
-      message.source_session = _session->id();
-      //message.message_buffer = _buffer.data();
-      //_session->received();
-      message.message_buffer = std::make_shared<std::string>(boost::beast::buffers_to_string(_buffer.data()));
-      _buffer.consume(_buffer.size());
-      if(_ws.got_text()) spdlog::info("Got message from Session[{}] : {}", std::string(message.source_session), *message.message_buffer);
-      else spdlog::info("Got message from Session[{}] : {} bytes", std::string(message.source_session), message.message_buffer->size());
-      _session->room().broadcast(std::move(message));
+      try {
+	message.source_session = _session->id();
+	//message.message_buffer = _buffer.data();
+	//_session->received();
+	message.message_buffer = std::make_shared<std::string>(boost::beast::buffers_to_string(_buffer.data()));
+	_buffer.consume(_buffer.size());
+	if(_ws.got_text()) spdlog::info("Got message from Session[{}] : {}", std::string(message.source_session), *message.message_buffer);
+	else spdlog::info("Got message from Session[{}] : {} bytes", std::string(message.source_session), message.message_buffer->size());
+	_session->room().broadcast(std::move(message));
+      } catch(std::exception& e) {
+	spdlog::error("Failed to broadcast {}'s message, Reason:{}", _session->id().str(), e.what());
+      }
     }
 
     do_read();
@@ -194,7 +198,12 @@ namespace blyat {
 
   void socket::on_write(boost::beast::error_code ec, std::size_t bytes_transferred) {
       if(ec) {
-	return spdlog::error("Session {} failed writing socket:{}", _session?_session->id().str():"UNKNONW_SESSION", ec.message());
+	spdlog::error("Session {} failed writing socket:{}", _session?_session->id().str():"UNKNONW_SESSION", ec.message());
+      }
+
+      if(!_ws.is_open()) { // session closed, just clear buffer and close all context
+	_queue.clear();
+	return;
       }
 
       _queue.erase(_queue.begin());
