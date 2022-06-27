@@ -1,6 +1,6 @@
 [service]
-listen_addr = "0.0.0.0"
-listen_port = 65472
+listen_addr = "${ADDR}"
+listen_port = ${PORT}
 secrets = "CYKABLYAT!"
 session_limit = 0
 

@@ -5,7 +5,7 @@
 
 #include <string>
 #include <memory>
-
+#include <chrono>
 namespace blyat {
   typedef std::string buffer_type;
 
