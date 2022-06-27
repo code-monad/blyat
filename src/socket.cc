@@ -16,6 +16,16 @@ namespace blyat {
 
   void socket::run() {
     _ws.set_option(boost::beast::websocket::stream_base::timeout::suggested(boost::beast::role_type::server));
+    boost::beast::websocket::permessage_deflate pmd;
+    pmd.client_enable = true;
+    pmd.server_enable = true;
+    pmd.compLevel = 3;
+    _ws.set_option(pmd);
+    _ws.auto_fragment(false);
+
+    // Autobahn|Testsuite needs this
+    _ws.read_message_max(100 * 1024 * 1024);
+    
     _ws.set_option(boost::beast::websocket::stream_base::decorator([](boost::beast::websocket::response_type& res){
       res.set(boost::beast::http::field::server, "IM-A-BLYAT-SERVER-YAY");
     }));
@@ -162,7 +172,7 @@ namespace blyat {
       }
     }
 
-    //_ws.text(_ws.got_text());
+    _ws.text(_ws.got_text());
     //_ws.binary(!_ws.got_text());
     blyat::message_t message;
     if(_session) {
