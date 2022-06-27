@@ -12,6 +12,7 @@ namespace blyat {
   struct message_t {
     blyat_id_t id = uuid();
     blyat_id_t source_session;
+    bool binary = false;
     std::shared_ptr<buffer_type> message_buffer;
     std::chrono::time_point<std::chrono::high_resolution_clock> timestamp;
 

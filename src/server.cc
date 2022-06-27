@@ -53,7 +53,7 @@ namespace blyat {
     }
 
     spdlog::info("Start accepting for incomming connections.");
-
+    _default_room = create_room("_");
     do_accept();    
   }
 

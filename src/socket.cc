@@ -16,6 +16,16 @@ namespace blyat {
 
   void socket::run() {
     _ws.set_option(boost::beast::websocket::stream_base::timeout::suggested(boost::beast::role_type::server));
+    boost::beast::websocket::permessage_deflate pmd;
+    pmd.client_enable = true;
+    pmd.server_enable = true;
+    pmd.compLevel = 3;
+    _ws.set_option(pmd);
+    _ws.auto_fragment(false);
+
+    // Autobahn|Testsuite needs this
+    _ws.read_message_max(100 * 1024 * 1024);
+    
     _ws.set_option(boost::beast::websocket::stream_base::decorator([](boost::beast::websocket::response_type& res){
       res.set(boost::beast::http::field::server, "IM-A-BLYAT-SERVER-YAY");
     }));
@@ -85,15 +95,20 @@ namespace blyat {
 	  }
 	  
 	  if(target_seq.empty() ) { // join default room
-	    self->session()->join_room_by_name("_");
+	    self->session()->join_default_room();
 	    spdlog::info("Session join default room.");
 	  } else if(target_seq.size() == 1) { // join by name
-	    //self->session()->join_room_by_name(targets.front());
+	    self->session()->join_room_by_name(target_seq.front());
 	  } else if(target_seq.size() > 1) {
 	    if(target_seq.front() == "room") { // by name
 	      std::string room_name(target_seq[1]);
 	      spdlog::info("Session {} try join room {}",session_id, room_name);
-	      self->session()->join_room_by_name(room_name);
+
+	      try{
+		self->session()->join_room_by_name(room_name);
+	      } catch(std::exception& e) {
+		spdlog::error("Session {} failed to join room {}, reason: {}", session_id, room_name, e.what());
+	      }
 	    }
 	    if(target_seq.front() == "room_id") { // by id
 	      try {
@@ -111,6 +126,7 @@ namespace blyat {
 	//self->stream().accept(self->req(), ec);
 	
 	self->stream().set_option(boost::beast::websocket::stream_base::timeout::suggested(boost::beast::role_type::server));
+	self->stream().binary(true);
 	self->stream().async_accept(self->req(), boost::beast::bind_front_handler(&socket::on_accept, self));
       } else { // a normal http request
 	spdlog::info("Normal http request, try handle it.");
@@ -148,21 +164,34 @@ namespace blyat {
 
     if(ec) {
       spdlog::error("Session {} got an error on read:{}", _session?_session->id().str():"UNKNONW_SESSION", ec.message());
+      // clear if buffer remains some message
+      _buffer.consume(_buffer.size());
+      if(_ws.is_open()) return do_read();
+      else {
+	if(_session) return _session->exit_from_server();
+      }
     }
 
     _ws.text(_ws.got_text());
+    //_ws.binary(!_ws.got_text());
     blyat::message_t message;
     if(_session) {
-      message.source_session = _session->id();
-      //message.message_buffer = _buffer.data();
-      //_session->received();
-      message.message_buffer = std::make_shared<std::string>(boost::beast::buffers_to_string(_buffer.data()));
-      _buffer.consume(_buffer.size());
-      spdlog::info("Got message from Session[{}] : {}", std::string(message.source_session), *message.message_buffer);
-      _session->room().broadcast(std::move(message));
+      try {
+	message.source_session = _session->id();
+	//message.message_buffer = _buffer.data();
+	//_session->received();
+	message.message_buffer = std::make_shared<std::string>(boost::beast::buffers_to_string(_buffer.data()));
+	_buffer.consume(_buffer.size());
+	message.binary = _ws.got_text();
+	if(_ws.got_text()) spdlog::info("Got message from Session[{}] : {}", std::string(message.source_session), *message.message_buffer);
+	else spdlog::info("Got message from Session[{}] : {} bytes", std::string(message.source_session), message.message_buffer->size());
+	_session->room().broadcast(std::move(message));
+      } catch(std::exception& e) {
+	spdlog::error("Failed to broadcast {}'s message, Reason:{}", _session->id().str(), e.what());
+      }
     }
 
-    _ws.async_read(_buffer, boost::beast::bind_front_handler(&socket::on_read, shared_from_this()));    
+    do_read();
   }
 
   void socket::on_send(std::shared_ptr<message_t> message) {
@@ -184,12 +213,19 @@ namespace blyat {
 
   void socket::on_write(boost::beast::error_code ec, std::size_t bytes_transferred) {
       if(ec) {
-	return spdlog::error("Session {} failed writing socket:{}", _session?_session->id().str():"UNKNONW_SESSION", ec.message());
+	spdlog::error("Session {} failed writing socket:{}", _session?_session->id().str():"UNKNONW_SESSION", ec.message());
+      }
+
+      if(!_ws.is_open()) { // session closed, just clear buffer and close all context
+	_queue.clear();
+	if(_session) return _session->exit_from_server();
+	return;
       }
 
       _queue.erase(_queue.begin());
 
       if(!_queue.empty()) { // keep writing waited queue
+	if(_queue.front()->binary) _ws.binary(true);
 	_ws.async_write(
 			boost::asio::buffer(*_queue.front()->message_buffer),
 			boost::beast::bind_front_handler(&socket::on_write,shared_from_this()));

@@ -41,6 +41,12 @@ namespace blyat {
     }
     spdlog::warn("Session {} can't find it's server holder context! This must be a bug!", std::string(_id));
   }
+
+  void session_t::join_default_room() {
+    if(_server) {
+      _server->move_session_to_room(_id, _server->default_room());
+    }
+  }
   
   room_t& session_t::room() {
     return _server->get_room_by_id(_room);

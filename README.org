@@ -26,15 +26,16 @@
   Now visit http://localhost:65472 or connect to ws://localhost:65472/
 
 * Webscoket Channel Specifier
-Channels are seperated using the endpoint '/room/room_id'.
-For example, "ws://localhost:65472/room/1" would be room "1", "ws://localhost:65472/room/blyat" would be room "blyat",etc.
-If no room name specified, then default room will be used. Which is Room "_".
+Channels are seperated using the endpoint ~/room/[room_id]~.
+For example, ~ws://localhost:65472/room/1~ would be room ~1~, ~ws://localhost:65472/room/blyat~ would be ~blyat~,etc.
+If no room name specified, then default room will be used. Which is Room ~_~.
 
-If adding "?echo=true" query, you will receive what message you send out.
+If adding ~"?echo=true"~ query, you will receive what message you send out.
 
-频道是由 URL上的"/room/room_id"来区分的。
-比如，"ws://localhost:65472/room/1"会进入房间名为"1"的channel, "ws://localhost:65472/room/blyat"会进入房间名为"blyat"的channel,以此类推.
-如果你在链接末尾加上“?echo=true”，那你会收到自己发出去的消息。
+频道是由 URL上的 ~/room/room_id~ 来区分的。
+比如:
+~ws://localhost:65472/room/1~ 会进入房间名为 ~1~ 的channel, ~ws://localhost:65472/room/blyat~ 会进入房间名为 ~blyat~ 的channel,以此类推.
+如果你在链接末尾加上 ~?echo=true~ ，那你会收到自己发出去的消息。
 
 
 * Compiling

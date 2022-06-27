@@ -18,6 +18,7 @@ namespace blyat {
     session_t(const blyat_id_t id = blyat::uuid(), const tag_t tag = BLYAT_NULL_TAG);
     session_t(const session_t& other) : _server{ other._server}, _echo{other._echo}, _room{other._room}, _context{other._context}, _id{other._id}, _tag{other._tag} {}
     std::shared_ptr<blyat::socket> create_context(boost::asio::ip::tcp::socket&& socket, const std::string& doc_root);
+    void join_default_room();
     void join_room_by_id(const std::uint64_t room_id);
     void join_room_by_name(const std::string room_name);
     void exit_from_server();
