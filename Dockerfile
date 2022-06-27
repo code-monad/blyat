@@ -20,4 +20,4 @@ COPY --from=build /src/build/blyat .
 COPY --from=build /src/config/blyat.toml ./config/blyat.toml
 COPY --from=build /src/docker/scripts.sh ./run.sh
 EXPOSE ${PORT}
-CMD /app/run.sh
+ENTRYPOINT ["/app/run.sh"]
