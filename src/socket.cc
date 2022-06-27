@@ -157,7 +157,9 @@ namespace blyat {
       // clear if buffer remains some message
       _buffer.consume(_buffer.size());
       if(_ws.is_open()) return do_read();
-      else return;
+      else {
+	if(_session) return _session->exit_from_server();
+      }
     }
 
     _ws.text(_ws.got_text());
@@ -206,6 +208,7 @@ namespace blyat {
 
       if(!_ws.is_open()) { // session closed, just clear buffer and close all context
 	_queue.clear();
+	if(_session) return _session->exit_from_server();
 	return;
       }
 
