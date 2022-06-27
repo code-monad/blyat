@@ -1,0 +1,22 @@
+[service]
+listen_addr = "0.0.0.0"
+listen_port = 65472
+secrets = "CYKABLYAT!"
+session_limit = 0
+
+[common]
+doc_root = "./dist"
+
+[log]
+enable = true
+path = "./logs"
+prefix = "blyat_"
+
+
+[db]
+enable = false
+
+[[room]]
+id = 114514
+name = "INM"
+session_limit = 3
