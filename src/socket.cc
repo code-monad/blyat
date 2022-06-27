@@ -156,7 +156,7 @@ namespace blyat {
       spdlog::error("Session {} got an error on read:{}", _session?_session->id().str():"UNKNONW_SESSION", ec.message());
       // clear if buffer remains some message
       _buffer.consume(_buffer.size());
-      do_read();
+      return do_read();
     }
 
     //_ws.text(_ws.got_text());
