@@ -115,6 +115,7 @@ namespace blyat {
 	//self->stream().accept(self->req(), ec);
 	
 	self->stream().set_option(boost::beast::websocket::stream_base::timeout::suggested(boost::beast::role_type::server));
+	self->stream().binary(true);
 	self->stream().async_accept(self->req(), boost::beast::bind_front_handler(&socket::on_accept, self));
       } else { // a normal http request
 	spdlog::info("Normal http request, try handle it.");
@@ -152,10 +153,12 @@ namespace blyat {
 
     if(ec) {
       spdlog::error("Session {} got an error on read:{}", _session?_session->id().str():"UNKNONW_SESSION", ec.message());
+      // clear if buffer remains some message
+      _buffer.consume(_buffer.size());
+      do_read();
     }
 
-    _ws.text(_ws.got_text());
-    //_ws.binary(!_ws.got_text());
+    //_ws.text(_ws.got_text());
     blyat::message_t message;
     if(_session) {
       message.source_session = _session->id();
@@ -168,7 +171,7 @@ namespace blyat {
       _session->room().broadcast(std::move(message));
     }
 
-    _ws.async_read(_buffer, boost::beast::bind_front_handler(&socket::on_read, shared_from_this()));    
+    do_read();
   }
 
   void socket::on_send(std::shared_ptr<message_t> message) {
