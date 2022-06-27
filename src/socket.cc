@@ -162,8 +162,8 @@ namespace blyat {
       }
     }
 
-    _ws.text(_ws.got_text());
-    _ws.binary(!_ws.got_text());
+    //_ws.text(_ws.got_text());
+    //_ws.binary(!_ws.got_text());
     blyat::message_t message;
     if(_session) {
       try {
@@ -215,7 +215,7 @@ namespace blyat {
       _queue.erase(_queue.begin());
 
       if(!_queue.empty()) { // keep writing waited queue
-	_ws.binary(_queue.front()->binary);
+	if(_queue.front()->binary) _ws.binary(true);
 	_ws.async_write(
 			boost::asio::buffer(*_queue.front()->message_buffer),
 			boost::beast::bind_front_handler(&socket::on_write,shared_from_this()));
