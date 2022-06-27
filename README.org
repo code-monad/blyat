@@ -1,0 +1,46 @@
+#+title: Blyat
+#+author: Code Monad
+#+date: 2022-06-25
+
+[[https://compiling.beatosion.cn/codemonad/danmaku-turbo][https://compiling.beatosion.cn/api/badges/codemonad/blyat/status.svg]]
+
+/An HTTP\/Websocket Mutex Flat Server/
+
+
+* Introduction
+
+** Features
+   - [X] Hosting for static files as an HTTP server.
+   - [X] Websocket broadcast server.
+   - [X] Multi-channel broadcast service
+   - [ ] Providing high-level API's for events callback and operations
+   
+   - [ ] WebGUI plugin
+
+     
+
+* Quick Start
+  #+begin_src bash
+    docker run --rm -it -p 65472:65472 cr.beatosion.cn/blyat
+  #+end_src
+  Now visit http://localhost:65472 or connect to ws://localhost:65472/
+
+* Webscoket Channel Specifier
+Channels are seperated using the endpoint '/room/room_id'.
+For example, "ws://localhost:65472/room/1" would be room "1", "ws://localhost:65472/room/blyat" would be room "blyat",etc.
+If no room name specified, then default room will be used. Which is Room "_".
+
+If adding "?echo=true" query, you will receive what message you send out.
+
+频道是由 URL上的"/room/room_id"来区分的。
+比如，"ws://localhost:65472/room/1"会进入房间名为"1"的channel, "ws://localhost:65472/room/blyat"会进入房间名为"blyat"的channel,以此类推.
+如果你在链接末尾加上“?echo=true”，那你会收到自己发出去的消息。
+
+
+* Compiling
+
+  #+begin_src bash
+    mkdir build && cd build;
+    cmake ..;
+    make -j;
+  #+end_src
