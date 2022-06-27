@@ -151,6 +151,7 @@ namespace blyat {
     }
 
     _ws.text(_ws.got_text());
+    //_ws.binary(!_ws.got_text());
     blyat::message_t message;
     if(_session) {
       message.source_session = _session->id();
@@ -158,7 +159,8 @@ namespace blyat {
       //_session->received();
       message.message_buffer = std::make_shared<std::string>(boost::beast::buffers_to_string(_buffer.data()));
       _buffer.consume(_buffer.size());
-      spdlog::info("Got message from Session[{}] : {}", std::string(message.source_session), *message.message_buffer);
+      if(_ws.got_text()) spdlog::info("Got message from Session[{}] : {}", std::string(message.source_session), *message.message_buffer);
+      else spdlog::info("Got message from Session[{}] : {} bytes", std::string(message.source_session), message.message_buffer->size());
       _session->room().broadcast(std::move(message));
     }
 
