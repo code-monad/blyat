@@ -93,7 +93,11 @@ namespace blyat {
 	    if(target_seq.front() == "room") { // by name
 	      std::string room_name(target_seq[1]);
 	      spdlog::info("Session {} try join room {}",session_id, room_name);
-	      self->session()->join_room_by_name(room_name);
+	      try{
+		self->session()->join_room_by_name(room_name);
+	      } catch(std::exception& e) {
+		spdlog::error("Session {} failed to join room {}, reason: {}", session_id, room_name, e.what());
+	      }
 	    }
 	    if(target_seq.front() == "room_id") { // by id
 	      try {
