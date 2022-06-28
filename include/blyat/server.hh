@@ -5,9 +5,13 @@
 #include <boost/asio/io_context.hpp>
 #include <boost/asio/ip/tcp.hpp>
 #include <boost/beast/core/error.hpp>
-#include <map>
+
 #include <entt/entity/registry.hpp>
 #include <blyat/config.hh>
+
+#include <map>
+#include <mutex>
+
 namespace blyat {
   class room_t;
   
@@ -32,9 +36,8 @@ namespace blyat {
     boost::asio::ip::tcp::acceptor _acceptor;
     std::string _doc_root;
     entt::basic_registry<blyat_id_t> _manager;
-    
-
-
+    std::mutex _room_mutex;
+    std::mutex _session_mutex;
   };
 }
 

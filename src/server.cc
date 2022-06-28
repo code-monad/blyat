@@ -8,9 +8,10 @@
 
 
 namespace blyat {
-  server::server(boost::asio::io_context& context) : _context{context}, _acceptor{_context}, _doc_root{"./dist"}, _manager{}{}
+  server::server(boost::asio::io_context& context) : _context{context}, _acceptor{_context}, _doc_root{"./dist"}, _manager{}, _room_mutex{}, _session_mutex{}{}
   
   blyat_id_t server::create_room(const std::string name) {
+    std::lock_guard<std::mutex> lock(_room_mutex);
     blyat_id_t entity = _manager.create();
     spdlog::info("Room {}[{}] created", name, entity.str());
     _manager.emplace<room_t>(entity, entity, name, this);
@@ -77,6 +78,7 @@ namespace blyat {
       return _manager.get<room_t>(room_handler);
     } else {
       if(create) {
+	//std::lock_guard<std::mutex> lock(_room_mutex);
 	return _manager.get<room_t>(create_room(name));
       }
       throw std::runtime_error(fmt::format("No such room named {}", name));
@@ -92,6 +94,8 @@ namespace blyat {
   }
 
   void server::move_session_to_room(blyat_id_t session, blyat_id_t room) {
+    //std::lock_guard<std::mutex> lock_session(_session_mutex);
+    //std::lock_guard<std::mutex> lock_room(_room_mutex);
     if(session != entt::null && room != entt::null) {
       if(_manager.valid(session) && _manager.valid(room)) {
 	auto& session_ctx = _manager.get<session_t>(session);
@@ -108,6 +112,7 @@ namespace blyat {
       return;
     } else {
       spdlog::info("Accepting...");
+      std::lock_guard<std::mutex> lock(_session_mutex);
       auto session = _manager.create();
       _manager.emplace<session_t>(session, this, session);
       
