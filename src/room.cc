@@ -15,13 +15,16 @@ namespace blyat {
   
   void room_t::broadcast(std::shared_ptr<message_t> message){
     if(!_server) return;
-    auto& sessions = _server->manager().get_or_emplace<std::unordered_set<blyat_id_t>>(_handler, std::unordered_set<blyat_id_t>());
-    for(const auto session : sessions) {
-      auto& session_ctx = _server->manager().get<session_t>(session);
-      if(session_ctx.id() != message->source_session
-	 || session_ctx.echo()
-	 ) session_ctx.send(message);
+    auto sessions = _server->get_sessions(_handler);
+    for(const auto session_id : sessions) {
+      auto session = _server->manager().try_get<session_t>(session_id);
+      
+      if(session && session->id() != message->source_session
+	 || session->echo()
+	 ) session->send(message);
     }
+    
+    
   }
 
 

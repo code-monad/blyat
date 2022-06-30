@@ -9,8 +9,8 @@
 #include <entt/entity/registry.hpp>
 #include <blyat/config.hh>
 
-#include <map>
 #include <mutex>
+#include <unordered_set>
 
 namespace blyat {
   class room_t;
@@ -26,7 +26,10 @@ namespace blyat {
     blyat_id_t has_room_id(std::uint64_t id);
     void run(config_fields_t configs);
     void move_session_to_room(blyat_id_t session, blyat_id_t room);
+    void remove_session_from_room(blyat_id_t session, blyat_id_t room);
+    void remove_session(blyat_id_t session);
     blyat_id_t default_room() { return _default_room; };
+    std::unordered_set<blyat_id_t> get_sessions(blyat_id_t room_id = entt::null);
 
   private:
     void do_accept();

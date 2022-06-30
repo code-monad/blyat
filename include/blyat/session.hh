@@ -31,6 +31,7 @@ namespace blyat {
     const blyat_id_t& server_id() const { return _id; }
     void set_echo(bool set_to) { _echo = set_to; }
     bool echo() const { return _echo; }
+    void release_socket() { _context.reset(); }
   private:
     bool _echo;
     server* _server;

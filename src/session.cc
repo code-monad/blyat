@@ -61,19 +61,19 @@ namespace blyat {
     if(!_server) return;
     
     if(_server->has_room_id(_room) != entt::null) {
-      _server->manager().get<std::unordered_set<blyat_id_t>>(_server->has_room_id(_room)).erase(_id);
-      spdlog::info("Removing {} from room {}", _id.str(), _server->has_room_id(_room).str());
+      _server->remove_session_from_room(_id, _room);
     }
     
     if(_server->manager().valid(_id)) {
-      spdlog::info("Removing {} from server", _id.str());
-      _server->manager().remove<session_t>(_id);
+
+      _server->remove_session(_id);
     }
     
   }
 
   
   void session_t::send(std::shared_ptr<message_t> message) {
+    if(!_context) return;
     spdlog::info("Send message[{}] to {}", message->id.str(), _id.str());
     _context->send(message);
   }

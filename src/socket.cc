@@ -55,7 +55,7 @@ namespace blyat {
 	  std::vector<std::string> query_lists{};
 	  boost::split(query_lists, query, boost::is_any_of("&"));
 	  std::string session_name;
-	  std::uint64_t session_id;
+	  std::uint64_t session_id_arg;
 
 	  std::map<std::string, std::string> query_sets{};
 	  
@@ -82,7 +82,7 @@ namespace blyat {
 	    // if setting session id
 	    if(query == "id") {
 	      try {
-		session_id = std::stoll(value);
+		session_id_arg = std::stoll(value);
 		//self->session()->set_id(session_id);
 	      } catch(std::exception& ex) {
 		spdlog::error("Ill-formed Session-ID {}, skipped.", value);
@@ -191,7 +191,7 @@ namespace blyat {
       }
     }
 
-    do_read();
+    if(_ws.is_open()) do_read();
   }
 
   void socket::on_send(std::shared_ptr<message_t> message) {
@@ -200,9 +200,14 @@ namespace blyat {
       if(_queue.size() > 1) {
 	return; // already writing
       }
-      _ws.async_write(
-		      boost::asio::buffer(*_queue.front()->message_buffer),
-		      boost::beast::bind_front_handler(&socket::on_write,shared_from_this()));
+      if(_ws.is_open()) {
+	_ws.async_write(
+			boost::asio::buffer(*_queue.front()->message_buffer),
+			boost::beast::bind_front_handler(&socket::on_write,shared_from_this()));
+      } else {
+        _queue.clear();
+	if(_session) return _session->exit_from_server();
+      }
       
   }
   
@@ -218,7 +223,7 @@ namespace blyat {
 
       if(!_ws.is_open()) { // session closed, just clear buffer and close all context
 	_queue.clear();
-	if(_session) return _session->exit_from_server();
+	if(_session) _session->exit_from_server();
 	return;
       }
 

@@ -94,14 +94,62 @@ namespace blyat {
   }
 
   void server::move_session_to_room(blyat_id_t session, blyat_id_t room) {
-    std::lock_guard<std::mutex> lock_session(_session_mutex);
-    std::lock_guard<std::mutex> lock_room(_room_mutex);
+    
     if(session != entt::null && room != entt::null) {
       if(_manager.valid(session) && _manager.valid(room)) {
-	auto& session_ctx = _manager.get<session_t>(session);
+	//std::lock_guard<std::mutex> lock_session(_session_mutex);
+	
+	auto session_ctx = _manager.try_get<session_t>(session);
 	//_manager.get<room_t>(room).add(session_ctx);
+	if(!session_ctx) return;
+	std::lock_guard<std::mutex> lock_room(_room_mutex);
 	_manager.get_or_emplace<std::unordered_set<blyat_id_t>>(room, std::unordered_set<blyat_id_t>()).insert(session);
-	session_ctx.set_room(room);
+	session_ctx->set_room(room);
+      }
+    }
+  }
+
+  
+  void server::remove_session_from_room(blyat_id_t session, blyat_id_t room) {
+    if(session != entt::null && room != entt::null) {
+      if(_manager.valid(session) && _manager.valid(room)) {
+	std::lock_guard<std::mutex> lock_room(_room_mutex);
+	auto sessions_in_room = _manager.try_get<std::unordered_set<blyat_id_t>>(room);
+	if(sessions_in_room) {
+	  try {
+	    spdlog::info("Removing {} from room {}", session.str(), room.str());
+	    sessions_in_room->erase(session);
+	    spdlog::info("removed");
+	  } catch (std::exception& ex) {
+	    spdlog::error("Failed to Remove Session {} from Room {}, Reason:{}", session.str(), room.str(), ex.what());
+	  }
+	}
+	
+      }
+    }
+  }
+
+  std::unordered_set<blyat_id_t> server::get_sessions(blyat_id_t room_id){
+    if(room_id != entt::null && _manager.valid(room_id)) {
+      std::lock_guard<std::mutex> lock_room(_room_mutex);
+      std::lock_guard<std::mutex> lock_session(_session_mutex);
+      return _manager.get<std::unordered_set<blyat_id_t>>(room_id);
+    }
+    return {};
+  }
+
+  void server::remove_session(blyat_id_t session){
+    if(session != entt::null && _manager.valid(session)) {
+      try{
+	//std::lock_guard<std::mutex> lock_session(_session_mutex);
+	spdlog::info("Removing {} from server", session.str());
+	if(_manager.any_of<session_t>(session)) {
+	  //_manager.erase<session_t>(session);
+	  //_manager.remove<session_t>(session);
+	  // _manager.destroy(_session);
+	}
+      } catch(std::exception& ex) {
+	spdlog::error("Failed to Remove Session {} from Server, Reason:{}", session.str(), ex.what());
       }
     }
   }
@@ -109,19 +157,15 @@ namespace blyat {
   void server::on_accept(boost::beast::error_code ec, boost::asio::ip::tcp::socket socket) {
     if(ec) {
       spdlog::error("Failed to accept a connection, Reason:{}", ec.message());
-      return;
+      return do_accept();
     } else {
       spdlog::info("Accepting...");
       std::lock_guard<std::mutex> lock(_session_mutex);
       auto session = _manager.create();
       _manager.emplace<session_t>(session, this, session);
-      
       _manager.get<session_t>(session).create_context(std::move(socket), _doc_root);
     }
-    _acceptor.async_accept(boost::asio::make_strand(_context), boost::beast::bind_front_handler(&server::on_accept,shared_from_this()));
-
-
-    
+    do_accept();
   }
 
   void server::do_accept() {
