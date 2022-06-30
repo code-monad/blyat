@@ -94,8 +94,8 @@ namespace blyat {
   }
 
   void server::move_session_to_room(blyat_id_t session, blyat_id_t room) {
-    //std::lock_guard<std::mutex> lock_session(_session_mutex);
-    //std::lock_guard<std::mutex> lock_room(_room_mutex);
+    std::lock_guard<std::mutex> lock_session(_session_mutex);
+    std::lock_guard<std::mutex> lock_room(_room_mutex);
     if(session != entt::null && room != entt::null) {
       if(_manager.valid(session) && _manager.valid(room)) {
 	auto& session_ctx = _manager.get<session_t>(session);
