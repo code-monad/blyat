@@ -63,7 +63,7 @@ int main(int argc, char* argv[]) {
     workers.emplace_back(
 			 [&ioc]{
 			   while(!ioc.stopped()) {
-			     ioc.poll_one();
+			     ioc.run_one();
 			     std::this_thread::yield();
 			   }
 			 }
