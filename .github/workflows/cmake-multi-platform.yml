@@ -54,7 +54,7 @@ jobs:
         echo "build-output-dir=${{ github.workspace }}/build" >> "$GITHUB_OUTPUT"
     - name: dependency install
       run: >
-        sudo apt-get install -y libboost-dev ninja-build
+        sudo apt-get install -y libboost-dev
 
     - name: Configure CMake
       # Configure CMake in a 'build' subdirectory. `CMAKE_BUILD_TYPE` is only required if you are using a single-configuration generator such as make.
@@ -68,7 +68,7 @@ jobs:
 
     - name: Build
       # Build your program with the given configuration. Note that --config is needed because the default Windows generator is a multi-config generator (Visual Studio generator).
-      run: mkdir -p ${{ steps.strings.outputs.build-output-dir}} && cd ${{steps.strings.outputs.build-output-dir}} && cmake ${{ steps.strings.outputs.build-output-dir }} -G Ninja -DCMAKE_BUILD_TYPE=Release && ninja -j
+      run: mkdir -p ${{ steps.strings.outputs.build-output-dir}} && cd ${{steps.strings.outputs.build-output-dir}} && rm * -rf && cmake ${{ steps.strings.outputs.build-output-dir }} -G Ninja -DCMAKE_BUILD_TYPE=Release && ninja -j
 
     - name: Test
       working-directory: ${{ steps.strings.outputs.build-output-dir }}
