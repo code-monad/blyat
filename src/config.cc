@@ -1,6 +1,6 @@
 #include <blyat/config.hh>
 #define TOML_EXCEPTIONS 0
-#include <toml++/toml.h>
+#include <toml++/toml.hpp>
 #include <spdlog/spdlog.h>
 
 namespace blyat {
