@@ -1,0 +1,16 @@
+language: cpp
+dist: jammy
+compiler:
+- clang
+- gcc
+os:
+- linux
+before_install:
+- echo $LANG
+- echo $LC_ALL
+- if [ $TRAVIS_OS_NAME == linux ]; then sudo apt-get update && sudo apt-get install -y libc++-dev libc++abi-dev libboost-dev ninja-build; fi
+- if [ $TRAVIS_OS_NAME == osx ]; then brew update && brew install boost ninja; fi
+script:
+- mkdir build && cd build
+- cmake .. -G Ninja
+- ninja -j
