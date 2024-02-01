@@ -1,9 +1,9 @@
+cmake_minimum_required(VERSION 3.2)
 project(blyat)
 
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_WARN_DEPRECATED FALSE) # boost::beast C++17 warnings
-cmake_minimum_required(VERSION 3.2)
 
 if(APPLE)
   set(CMAKE_OSX_ARCHITECTURES "x86_64;arm64") # For new mac build universal

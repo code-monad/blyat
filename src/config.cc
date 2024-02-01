@@ -1,6 +1,6 @@
 #include <blyat/config.hh>
 #define TOML_EXCEPTIONS 0
-#include <toml++/toml.h>
+#include <toml++/toml.hpp>
 #include <spdlog/spdlog.h>
 
 namespace blyat {
@@ -11,7 +11,7 @@ namespace blyat {
   void config_loader::parse(const std::string path) {
     if(path.empty()) return;
     spdlog::info("Loading configs from {}", path);
-    toml::parse_result parse_result = toml::parse_file(path);
+    auto parse_result = toml::parse_file(path);
     if(!parse_result) {
       spdlog::error("Failed to load config:{}!Please check the file.", path);
       return;

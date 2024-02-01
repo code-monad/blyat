@@ -3,8 +3,8 @@
 
 
 #include <blyat/uuid.hh>
-#include <toml++/impl/std_optional.h>
-#include <toml++/impl/table.h>
+#include <toml++/impl/std_optional.hpp>
+#include <toml++/impl/table.hpp>
 #include <vector>
 #include <string>
 namespace blyat {
@@ -54,6 +54,7 @@ namespace blyat {
     void parse(const std::string path);
     bool validate() const { return _parsed; }
     config_fields_t& fields() { return _fields; }
+    ~config_loader() {};
     
   private:
     bool _parsed = false;
