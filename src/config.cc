@@ -1,10 +1,5 @@
 #include <blyat/config.hh>
 #define TOML_EXCEPTIONS 0
-
-// fix old clang which will lead to a undefined detor error
-#if defined(__clang__)
-  #define TOML_ALWAYS_INLINE inline
-#endif
 #include <toml++/toml.h>
 #include <spdlog/spdlog.h>
 
