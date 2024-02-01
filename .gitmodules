@@ -1,9 +1,9 @@
 [submodule "3rd_party/spdlog"]
 	path = 3rd_party/spdlog
-	url = https://git.beatosion.cn/mirror/spdlog.git
+	url = https://github.com/gabime/spdlog.git
 [submodule "3rd_party/entt"]
 	path = 3rd_party/entt
-	url = https://git.beatosion.cn/mirror/entt.git
+	url = https://github.com/skypjack/entt.git
 [submodule "3rd_party/tomlplusplus"]
 	path = 3rd_party/tomlplusplus
-	url = https://git.beatosion.cn/mirror/tomlplusplus.git
+	url = https://github.com/marzer/tomlplusplus.git
