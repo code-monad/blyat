@@ -21,7 +21,7 @@ An HTTP&Websocket Mutex Flat Server
 
 * Quick Start
   #+begin_src bash
-    docker run --rm -it -p 65472:65472 cr.beatosion.cn/blyat
+    docker run --rm -it -p 65472:65472 codemonad/blyat
   #+end_src
   Now visit http://localhost:65472 or connect to ws://localhost:65472/
 
