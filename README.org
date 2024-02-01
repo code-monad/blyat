@@ -2,7 +2,8 @@
 #+author: Code Monad
 #+date: 2022-06-25
 
-![example workflow](https://github.com/code-monad/blyat/actions/workflows/cmake-multi-platform.yml/badge.svg)
+[[CI Status][https://github.com/code-monad/blyat/actions/workflows/cmake-multi-platform.yml/badge.svg]]
+
 /An HTTP&Websocket Mutex Flat Server/
 
 
