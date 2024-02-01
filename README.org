@@ -30,7 +30,7 @@ Channels are seperated using the endpoint ~/room/[room_id]~.
 For example, ~ws://localhost:65472/room/1~ would be room ~1~, ~ws://localhost:65472/room/blyat~ would be ~blyat~,etc.
 If no room name specified, then default room will be used. Which is Room ~_~.
 
-If adding ~"?echo=true"~ query, you will receive what message you send out.
+If adding ~?echo=true~ query, you will receive what message you send out.
 
 频道是由 URL上的 ~/room/room_id~ 来区分的。
 比如:
